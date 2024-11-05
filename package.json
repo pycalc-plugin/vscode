@@ -1,12 +1,21 @@
 {
   "name": "pycalc",
   "displayName": "pycalc",
-  "description": "Desc pycalc",
+  "publisher": "pycalc",
+  "description": "The pycalc plugin enables the execution of python code directly within the editor upon pressing the Enter key.",
   "version": "1.0.0",
   "engines": {
     "vscode": "^1.95.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pycalc-plugin/vscode.git"
+  },
+  "homepage": "https://github.com/pycalc-plugin/vscode/blob/master/README.md",
+  "license": "Apache-2.0",
   "categories": [
+    "Programming Languages",
+    "Notebooks",
     "Other"
   ],
   "activationEvents": [
