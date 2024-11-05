@@ -1,0 +1,98 @@
+{
+  "name": "pycalc",
+  "displayName": "pycalc",
+  "description": "Desc pycalc",
+  "version": "1.0.1",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "menus": {
+      "editor/context": [
+        {
+          "when": "pycalc.enabled",
+          "command": "pycalc.enable",
+          "group": "z_commands"
+        },
+        {
+          "when": "!pycalc.enabled",
+          "command": "pycalc.disable",
+          "group": "z_commands"
+        },
+        {
+          "when": "editorHasSelection||editorFocus",
+          "command": "pycalc.selected",
+          "group": "z_commands"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "pycalc.enable",
+          "when": "false"
+        },
+        {
+          "command": "pycalc.disable",
+          "when": "false"
+        },
+        {
+          "command": "pycalc.enter",
+          "when": "false"
+        },
+        {
+          "command": "pycalc.selected",
+          "when": "false"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "pycalc.enable",
+        "title": "pycalc [✓]",
+        "when": "false"
+      },
+      {
+        "command": "pycalc.disable",
+        "title": "pycalc [×]",
+        "when": "false"
+      },
+      {
+        "command": "pycalc.enter",
+        "title": "pycalc"
+      },
+      {
+        "command": "pycalc.selected",
+        "title": "pycalc selected"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "pycalc.enter",
+        "key": "enter",
+        "when": "editorTextFocus"
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.9",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.95.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^9.13.0"
+  },
+  "dependencies": {
+    "jsdom": "^25.0.1"
+  }
+}
