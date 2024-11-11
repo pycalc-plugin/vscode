@@ -3,7 +3,7 @@
   "displayName": "pycalc",
   "publisher": "pycalc",
   "description": "The pycalc plugin enables the execution of python code directly within the editor upon pressing the Enter key.",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.95.0"
   },
