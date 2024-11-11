@@ -4,8 +4,6 @@
 
 The pycalc plugin enables the execution of python code directly within the editor upon pressing the Enter key.
 
-## Release Notes
+Based on Brython 3.13.
 
-### 1.0.0
-
-Initial release
+![screenshot](https://github.com/pycalc-plugin/screencast/blob/master/vscode.gif?raw=true)
