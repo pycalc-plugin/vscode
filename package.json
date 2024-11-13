@@ -3,9 +3,9 @@
   "displayName": "pycalc",
   "publisher": "pycalc",
   "description": "The pycalc plugin enables the execution of python code directly within the editor upon pressing the Enter key.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "engines": {
-    "vscode": "^1.95.0"
+    "vscode": "^1.74.0"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
   "activationEvents": [
     "onStartupFinished"
   ],
-  "main": "./extension.js",
+  "main": "./src/extension.js",
   "contributes": {
     "menus": {
       "editor/context": [
@@ -96,7 +96,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.9",
     "@types/node": "20.x",
-    "@types/vscode": "^1.95.0",
+    "@types/vscode": "^1.74.0",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1",
     "eslint": "^9.13.0"

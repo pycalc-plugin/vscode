@@ -28,9 +28,17 @@ const html = `
 `
 
 const pycode = `
-import sys
 import code
+import sys
+import time
 from browser import console, timer
+
+
+def __sleep__(duration):
+    delay = time.time() + duration
+    while time.time() < delay:
+        ...
+
 
 class Stdout:
     buffer = ""
@@ -51,10 +59,11 @@ class Stdout:
 
 class Stderr:
     def write(self, value):
-        console.error(value)
+        sys.__stderr__.write(value)
+        sys.__stderr__.flush()
 
     def flush(self):
-        pass
+        sys.__stderr__.flush()
 
 
 def interact():
@@ -72,12 +81,13 @@ def interact():
             repl.runcode(line)
         else:
             repl.push(line)
-    except Exception as e:
-        print(rerp(e))
+    except BaseException as e:
+        sys.stderr.write(rerp(e))
 
 
 sys.stderr = Stderr()
 sys.stdout = Stdout()
+time.sleep = __sleep__
 timer.set_interval(interact, 10)
 repl = code.InteractiveConsole()
 `
@@ -85,44 +95,62 @@ repl = code.InteractiveConsole()
 function init() {
     const dom = new jsdom.JSDOM(html, { url: "http://localhost", runScripts: "dangerously", resources: "usable" });
 
+    const input = () => {
+        const runs = performance.now() - heartbeat;
+
+        if (runs > 3 * 1000) {
+            const result = { "heartbeat": heartbeat };
+            heartbeat = performance.now();
+            parentPort.postMessage(result);
+        }
+
+        if (stdin.length == 0) {
+            return null;
+        }
+
+        return stdin.shift();
+    }
+
     dom.window.addEventListener("load", () => {
-        setInterval(function () {
-            if (stdout.length > 0) {
-                parentPort.postMessage({ "stdout": stdout });
-                stdout.length = 0;
-            }
 
-            if (stderr.length > 0) {
-                parentPort.postMessage({ "stderr": stderr });
-                stderr.length = 0;
-            }
-        }, 10);
+       setInterval(function () {
+           if (stdout.length > 0) {
+               parentPort.postMessage({ "stdout": stdout });
+               stdout.length = 0;
+           }
 
-        dom.window.prompt = function () {
-            const runs = performance.now() - heartbeat;
+           if (stderr.length > 0) {
+               parentPort.postMessage({ "stderr": stderr });
+               stderr.length = 0;
+           }
+       }, 10);
 
-            if (runs > 3 * 1000) {
-                let result = { "heartbeat": heartbeat };
-                heartbeat = performance.now();
-                parentPort.postMessage(result);
-            }
-
-            if (stdin.length == 0) {
-                return null;
-            }
-
-            return stdin.shift();
-        };
-
-        dom.window.console.log = function (text) {
-            stdout.push(text);
-        };
-
-        dom.window.console.error = function (text) {
-            stderr.push(text);
-        };
+        dom.window.prompt = input;
 
         brython = dom.window.__BRYTHON__;
+
+        brython.imported._sys.stdin = {
+            async readline() {
+                return input();
+            },
+            read() {
+                return input();
+            }
+        }
+
+        brython.imported._sys.stdout = {
+            write(content) {
+                stdout.push(content);
+            },
+            flush() { },
+        },
+
+        brython.imported._sys.stderr = {
+            write(content) {
+                stderr.push(content);
+            },
+            flush() { },
+        }
 
         brython.runPythonSource(pycode);
     });
