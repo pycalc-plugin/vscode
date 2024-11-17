@@ -40,6 +40,10 @@ function onEnter() {
 
     vscode.commands.executeCommand("type", { text: "\n" });
 
+    if (!isEnabled()) {
+        return;
+    }
+
     const pos = editor.selection.active;
     let line = editor.document.lineAt(pos.line).text;
     line = line.substring(0, pos.character);
@@ -65,9 +69,7 @@ function calcSelected() {
     const pycode = editor.document.getText(selection);
 
     if (!pycode.endsWith("\n")) {
-        editor.edit(edit => {
-            edit.insert(getCursorPos(selection), "\n");
-        });
+        executePythonCode("print('')", false);
     }
 
     const pos = getCursorPos(selection);
@@ -77,6 +79,7 @@ function calcSelected() {
 }
 
 function checkLongRunning() {
+    clearTimeout(timer);
     timer = setTimeout(() => {
         vscode.window.showWarningMessage(
             "The Python code has been running for a long time. Do you want to terminate it?", "Yes", "No")
@@ -94,9 +97,9 @@ function checkLongRunning() {
 function createWorker() {
     const workerPath = path.join(__dirname, "worker.js");
     worker = new Worker(workerPath);
+    checkLongRunning();
 
     worker.on("message", (message) => {
-        clearTimeout(timer);
         checkLongRunning();
 
         if ("stdout" in message) {
@@ -107,7 +110,7 @@ function createWorker() {
         if ("stderr" in message) {
             let error = message["stderr"].join("");
 
-            const regex = /\)\n  (File "<\w+>", line \d+(, in <module>|).*)/s;
+            const regex = / {2}(File "<\w+>", line \d+(, in <module>|).*)/s;
             const match = error.match(regex);
             if (match) {
                 error = match[1]
@@ -119,6 +122,14 @@ function createWorker() {
     worker.on("error", (error) => {
         vscode.window.showErrorMessage(error.toString());
     });
+}
+
+function releaseWorker() {
+    if (worker) {
+        clearTimeout(timer);
+        worker.terminate();
+        worker = null;
+    }
 }
 
 function isEnabled() {
@@ -136,22 +147,14 @@ function setEnabled(enabled) {
 }
 
 function pluginEnable() {
-    pluginDisable();
-
+    releaseWorker();
     createWorker();
-    checkLongRunning();
 
     setEnabled(true);
     vscode.commands.executeCommand("setContext", "pycalc.enabled", isEnabled());
 }
 
 function pluginDisable() {
-    if (worker) {
-        clearTimeout(timer);
-        worker.terminate();
-        worker = null;
-    }
-
     setEnabled(false);
     vscode.commands.executeCommand("setContext", "pycalc.enabled", isEnabled());
 }
@@ -159,9 +162,7 @@ function pluginDisable() {
 async function activate(context) {
     state = context.globalState;
 
-    if (isEnabled()) {
-        pluginEnable();
-    }
+    createWorker();
 
     const enter = vscode.commands.registerCommand("pycalc.enter", onEnter);
     const enable = vscode.commands.registerCommand("pycalc.enable", pluginDisable);
